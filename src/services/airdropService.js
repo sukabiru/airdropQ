@@ -14,25 +14,86 @@ export const getAirdrops = async (userId) => {
 };
 
 export const createAirdrop = async (userId, airdropData) => {
+  // Parse reward properly
+  let rewardValue = null;
+  if (airdropData.reward && airdropData.reward.toString().trim() !== '') {
+    rewardValue = parseFloat(airdropData.reward);
+    if (isNaN(rewardValue)) {
+      rewardValue = null;
+    }
+  }
+
+  // Clean and format data
+  const cleanData = {
+    user_id: userId,
+    name: airdropData.name,
+    categories: airdropData.categories || [],
+    status: airdropData.status,
+    date: airdropData.date && airdropData.date.trim() !== '' ? airdropData.date : null,
+    notes: airdropData.notes && airdropData.notes.trim() !== '' ? airdropData.notes : null,
+    link: airdropData.link && airdropData.link.trim() !== '' ? airdropData.link : null,
+    reward: rewardValue,
+    selected_wallet: airdropData.selected_wallet && airdropData.selected_wallet !== '' ? airdropData.selected_wallet : null,
+    selected_twitter: airdropData.selected_twitter && airdropData.selected_twitter !== '' ? airdropData.selected_twitter : null,
+    selected_discord: airdropData.selected_discord && airdropData.selected_discord !== '' ? airdropData.selected_discord : null,
+    selected_telegram: airdropData.selected_telegram && airdropData.selected_telegram !== '' ? airdropData.selected_telegram : null,
+    selected_email: airdropData.selected_email && airdropData.selected_email !== '' ? airdropData.selected_email : null
+  };
+
+  console.log('Creating airdrop with data:', cleanData);
+
   const { data, error } = await supabase
     .from('airdrops')
-    .insert([{ ...airdropData, user_id: userId }])
+    .insert([cleanData])
     .select()
     .single();
 
-  if (error) throw error;
+  if (error) {
+    console.error('Supabase error:', error);
+    throw error;
+  }
+  
   return data;
 };
 
 export const updateAirdrop = async (airdropId, updates) => {
+  // Parse reward properly
+  let rewardValue = null;
+  if (updates.reward && updates.reward.toString().trim() !== '') {
+    rewardValue = parseFloat(updates.reward);
+    if (isNaN(rewardValue)) {
+      rewardValue = null;
+    }
+  }
+
+  // Clean and format data
+  const cleanData = {
+    name: updates.name,
+    categories: updates.categories || [],
+    status: updates.status,
+    date: updates.date && updates.date.trim() !== '' ? updates.date : null,
+    notes: updates.notes && updates.notes.trim() !== '' ? updates.notes : null,
+    link: updates.link && updates.link.trim() !== '' ? updates.link : null,
+    reward: rewardValue,
+    selected_wallet: updates.selected_wallet && updates.selected_wallet !== '' ? updates.selected_wallet : null,
+    selected_twitter: updates.selected_twitter && updates.selected_twitter !== '' ? updates.selected_twitter : null,
+    selected_discord: updates.selected_discord && updates.selected_discord !== '' ? updates.selected_discord : null,
+    selected_telegram: updates.selected_telegram && updates.selected_telegram !== '' ? updates.selected_telegram : null,
+    selected_email: updates.selected_email && updates.selected_email !== '' ? updates.selected_email : null
+  };
+
   const { data, error } = await supabase
     .from('airdrops')
-    .update(updates)
+    .update(cleanData)
     .eq('id', airdropId)
     .select()
     .single();
 
-  if (error) throw error;
+  if (error) {
+    console.error('Supabase error:', error);
+    throw error;
+  }
+  
   return data;
 };
 
