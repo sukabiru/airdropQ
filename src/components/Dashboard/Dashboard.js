@@ -1,5 +1,5 @@
 // src/components/Dashboard/Dashboard.js
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, TrendingUp } from 'lucide-react';
 import { 
   getAirdrops, 
@@ -29,7 +29,7 @@ const Dashboard = ({ user, onLogout }) => {
   const [darkMode, setDarkMode] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [editingAirdrop, setEditingAirdrop] = useState(null);
-  const itemsPerPage = 9;
+  const itemsPerPage = 15; // Increased for list view
 
   // Load theme from localStorage
   useEffect(() => {
@@ -44,8 +44,17 @@ const Dashboard = ({ user, onLogout }) => {
     localStorage.setItem('theme', darkMode ? 'dark' : 'light');
   }, [darkMode]);
 
-  // loadData wrapped in useCallback
-  const loadData = useCallback(async () => {
+  // Load data on mount
+  useEffect(() => {
+    loadData();
+  }, [user]);
+
+  // Reset to page 1 when filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterStatus]);
+
+  const loadData = async () => {
     setLoading(true);
     try {
       const [airdropsData, walletsData, socialData, categoriesData] = await Promise.all([
@@ -65,17 +74,7 @@ const Dashboard = ({ user, onLogout }) => {
     } finally {
       setLoading(false);
     }
-  }, [user.id]);
-
-  // Load data on mount
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
-
-  // Reset to page 1 when filter changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [filterStatus]);
+  };
 
   const handleAddAirdrop = async (airdropData) => {
     try {
@@ -245,9 +244,9 @@ const Dashboard = ({ user, onLogout }) => {
         )}
 
         {/* Airdrop List */}
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="space-y-3">
           {currentAirdrops.length === 0 ? (
-            <div className={`${darkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white'} rounded-lg shadow-sm p-12 text-center md:col-span-3`}>
+            <div className={`${darkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white'} rounded-lg shadow-sm p-12 text-center`}>
               <TrendingUp size={48} className={`mx-auto ${darkMode ? 'text-gray-600' : 'text-gray-300'} mb-4`} />
               <h3 className={`text-xl font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-2`}>
                 {filterStatus === 'all' ? 'Belum ada airdrop' : `Belum ada airdrop ${filterStatus}`}
